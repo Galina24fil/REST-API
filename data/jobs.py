@@ -17,4 +17,3 @@ class Jobs(SqlAlchemyBase, UserMixin, SerializerMixin):
     start_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now, nullable=True)
     end_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now, nullable=True)
     user = orm.relationship("User")
-    hazard_level = orm.relationship("HazardLevel", secondary="association",  backref="jobs")
