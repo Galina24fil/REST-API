@@ -19,8 +19,8 @@ def get_jobs():
         {
             'jobs':
                 [item.to_dict(only=(
-                'id', 'team_leader', 'job', 'work_size', 'collaborators', 'start_date', 'end_date', 'is_finished'))
-                 for item in jobs]
+                    'id', 'team_leader', 'job', 'work_size', 'collaborators', 'start_date', 'end_date', 'is_finished'))
+                    for item in jobs]
         }
     )
 
@@ -41,27 +41,26 @@ def get_jobs1(job_id):
 
 @blueprint.route('/api/jobs', methods=['POST'])
 def get_jobs2():
+    db_sess = db_session.create_session()
     if not request.json:
         return jsonify({'error': 'Empty request'})
     elif not all(key in request.json for key in
-                 ['id', 'team_leader', 'job', 'work_size', 'collaborators', 'is_finished']):
+                 ['team_leader', 'job', 'work_size', 'collaborators', 'is_finished']):
         return jsonify({'error': 'Bad request'})
-    db_sess = db_session.create_session()
-    s = db_sess.query(Jobs).filter(Jobs.id == request.json['id']).first()
-    if not s:
-        jobs = Jobs(
-            id=request.json['id'],
-            team_leader=request.json['team_leader'],
-            job=request.json['job'],
-            work_size=request.json['work_size'],
-            collaborators=request.json['collaborators'],
-            is_finished=request.json['is_finished']
-        )
-        db_sess.add(jobs)
-        db_sess.commit()
-        return jsonify({'success': 'OK'})
-    else:
-        return jsonify({'error': 'Id already exists'})
+    elif 'id' in request.json:
+        s = db_sess.query(Jobs).filter(Jobs.id == request.json['id']).first()
+        if s:
+            return jsonify({'error': 'Id already exists'})
+    jobs = Jobs(
+        team_leader=request.json['team_leader'],
+        job=request.json['job'],
+        work_size=request.json['work_size'],
+        collaborators=request.json['collaborators'],
+        is_finished=request.json['is_finished']
+    )
+    db_sess.add(jobs)
+    db_sess.commit()
+    return jsonify({'success': 'OK'})
 
 
 @blueprint.route('/api/jobs/<int:jobs_id>', methods=['DELETE'])
