@@ -1,15 +1,15 @@
 import flask
 from . import db_session
-from . jobs import Jobs
+from .jobs import Jobs
 from flask import jsonify
 from flask import request
-
 
 blueprint = flask.Blueprint(
     'jobs_api',
     __name__,
     template_folder='templates'
 )
+
 
 @blueprint.route('/api/jobs')
 def get_jobs():
@@ -18,10 +18,12 @@ def get_jobs():
     return jsonify(
         {
             'jobs':
-                [item.to_dict(only=('id', 'team_leader', 'job', 'work_size', 'collaborators', 'start_date', 'end_date', 'is_finished'))
+                [item.to_dict(only=(
+                'id', 'team_leader', 'job', 'work_size', 'collaborators', 'start_date', 'end_date', 'is_finished'))
                  for item in jobs]
         }
     )
+
 
 @blueprint.route('/api/jobs/<int:job_id>', methods=['GET'])
 def get_jobs1(job_id):
@@ -35,6 +37,7 @@ def get_jobs1(job_id):
                 'id', 'team_leader', 'job', 'work_size', 'collaborators', 'start_date', 'end_date', 'is_finished'))
         }
     )
+
 
 @blueprint.route('/api/jobs', methods=['POST'])
 def get_jobs2():
@@ -71,12 +74,13 @@ def delete_jobs(jobs_id):
     db_sess.commit()
     return jsonify({'success': 'OK'})
 
+
 @blueprint.route('/api/jobs/<int:jobs_id>', methods=['POST'])
 def edit_jobs(jobs_id):
     if not request.json:
         return jsonify({'error': 'Empty request'})
     elif not all(key in request.json for key in
-                 ['id', 'team_leader', 'job', 'work_size', 'collaborators', 'is_finished']):
+                 ['team_leader', 'job', 'work_size', 'collaborators', 'is_finished']):
         return jsonify({'error': 'Bad request'})
     db_sess = db_session.create_session()
     s = db_sess.query(Jobs).filter(Jobs.id == jobs_id).first()
@@ -87,7 +91,7 @@ def edit_jobs(jobs_id):
         db_sess.delete(jobs)
         db_sess.commit()
         jobs = Jobs(
-            id=request.json['id'],
+            id=jobs_id,
             team_leader=request.json['team_leader'],
             job=request.json['job'],
             work_size=request.json['work_size'],
